@@ -188,6 +188,7 @@
       <option value="1">Last Day</option>
       <option value="7">Last 7 Days</option>
       <option value="30" selected>Last 30 Days</option>
+      <option value="all">All Time</option>
       <option value="custom">Custom</option>
     </select>
 
@@ -223,9 +224,10 @@
 
       const allDates = rawData.map(r => r.date).filter(Boolean).sort();
       const latestDate = allDates[allDates.length - 1];
+      const earliestDate = allDates[0];
 
       document.getElementById('meta').textContent =
-        `Default view: Last 30 days ending ${latestDate}. Click any page row to see daily clicks and impressions for that page.`;
+        `Default view: Last 30 days ending ${latestDate}. Use "All Time" to view full history from ${earliestDate}. Click any page row to see daily clicks and impressions for that page.`;
 
       setPresetRange(30, latestDate);
       applyFilters();
@@ -234,9 +236,17 @@
     function handleRangeChange() {
       const value = document.getElementById('range-select').value;
       const allDates = rawData.map(r => r.date).filter(Boolean).sort();
+      const earliestDate = allDates[0];
       const latestDate = allDates[allDates.length - 1];
 
       if (value === 'custom') {
+        return;
+      }
+
+      if (value === 'all') {
+        document.getElementById('start-date').value = earliestDate;
+        document.getElementById('end-date').value = latestDate;
+        applyFilters();
         return;
       }
 
@@ -341,7 +351,7 @@
 
     function updateMeta(startDate, endDate) {
       document.getElementById('meta').textContent =
-        `Showing data from ${startDate || 'earliest available'} through ${endDate || 'latest available'}. Default view is Last 30 Days. Click any page row to see daily clicks and impressions for that page.`;
+        `Showing data from ${startDate || 'earliest available'} through ${endDate || 'latest available'}. Default view is Last 30 Days. Use "All Time" to view full history. Click any page row to see daily clicks and impressions for that page.`;
     }
 
     function sortTable(column) {
