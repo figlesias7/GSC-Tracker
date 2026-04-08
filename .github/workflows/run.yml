@@ -34,6 +34,6 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git add gsc_data.csv
-          git diff --cached --quiet || git commit -m "Update GSC data"
+          git add data docs
+          git diff --cached --quiet || git commit -m "Update GSC dashboard data"
           git push
