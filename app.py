@@ -9,9 +9,9 @@ from pathlib import Path
 SCOPES = ['https://www.googleapis.com/auth/webmasters.readonly']
 SITE_URL = os.environ.get("GSC_SITE")
 
-# Pull last 30 days ending today
+# Pull up to the last 180 days of page-by-day data
 END_DATE = date.today()
-START_DATE = END_DATE - timedelta(days=30)
+START_DATE = END_DATE - timedelta(days=179)
 
 credentials = service_account.Credentials.from_service_account_info(
     json.loads(os.environ.get("GOOGLE_CREDS")),
@@ -23,7 +23,7 @@ service = build('searchconsole', 'v1', credentials=credentials)
 request = {
     'startDate': START_DATE.isoformat(),
     'endDate': END_DATE.isoformat(),
-    'dimensions': ['page'],
+    'dimensions': ['date', 'page'],
     'rowLimit': 25000
 }
 
@@ -36,57 +36,31 @@ rows = response.get('rows', [])
 
 data = []
 for row in rows:
+    keys = row.get('keys', [])
+    row_date = keys[0] if len(keys) > 0 else None
+    row_page = keys[1] if len(keys) > 1 else None
+
     data.append({
-        "snapshot_date": END_DATE.isoformat(),
-        "start_date": START_DATE.isoformat(),
-        "end_date": END_DATE.isoformat(),
-        "page": row['keys'][0],
-        "clicks": row['clicks'],
-        "impressions": row['impressions'],
-        "ctr": row['ctr'],
-        "position": row['position']
+        "date": row_date,
+        "page": row_page,
+        "clicks": row.get("clicks", 0),
+        "impressions": row.get("impressions", 0),
+        "ctr": row.get("ctr", 0),
+        "position": row.get("position", 0)
     })
 
 df = pd.DataFrame(data)
 
-# Create folders
+if df.empty:
+    df = pd.DataFrame(columns=["date", "page", "clicks", "impressions", "ctr", "position"])
+
 Path("data").mkdir(exist_ok=True)
 Path("docs").mkdir(exist_ok=True)
 
-# Save latest snapshot
-latest_csv = "data/gsc_latest.csv"
-df.to_csv(latest_csv, index=False)
+# Save raw daily data
+df.to_csv("data/gsc_daily_data.csv", index=False)
 
-# Save dated snapshot
-dated_csv = f"data/gsc_snapshot_{END_DATE.isoformat()}.csv"
-df.to_csv(dated_csv, index=False)
+# Save JSON for dashboard
+df.to_json("docs/daily_data.json", orient="records", indent=2)
 
-# Append to history
-history_csv = "data/gsc_history.csv"
-if os.path.exists(history_csv):
-    old_df = pd.read_csv(history_csv)
-    combined = pd.concat([old_df, df], ignore_index=True)
-    combined = combined.drop_duplicates(subset=["snapshot_date", "page"], keep="last")
-else:
-    combined = df.copy()
-
-combined.to_csv(history_csv, index=False)
-
-# Create summary JSON for dashboard
-summary = {
-    "site": SITE_URL,
-    "snapshot_date": END_DATE.isoformat(),
-    "total_pages": int(df["page"].nunique()) if not df.empty else 0,
-    "total_clicks": float(df["clicks"].sum()) if not df.empty else 0,
-    "total_impressions": float(df["impressions"].sum()) if not df.empty else 0,
-    "avg_position": float(df["position"].mean()) if not df.empty else 0
-}
-
-with open("docs/summary.json", "w", encoding="utf-8") as f:
-    json.dump(summary, f, indent=2)
-
-# Export top pages JSON
-top_pages = df.sort_values(["clicks", "impressions"], ascending=[False, False]).head(100)
-top_pages.to_json("docs/top_pages.json", orient="records", indent=2)
-
-print("Daily snapshot, history, and dashboard data exported successfully")
+print("Daily page-level GSC data exported successfully")
