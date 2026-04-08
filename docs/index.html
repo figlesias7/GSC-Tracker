@@ -74,6 +74,7 @@
       padding: 10px;
       text-align: left;
       font-size: 14px;
+      vertical-align: top;
     }
     th {
       background: #f3f3f3;
@@ -90,6 +91,62 @@
     }
     a {
       word-break: break-word;
+    }
+    .page-row {
+      cursor: pointer;
+    }
+    .page-row:hover {
+      background: #fafafa;
+    }
+    .expanded-row td {
+      background: #fcfcfc;
+      padding: 18px;
+    }
+    .chart-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .chart-title {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .chart-meta {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .chart-box {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 12px;
+      background: white;
+    }
+    .chart-svg {
+      width: 100%;
+      height: 220px;
+      display: block;
+    }
+    .chart-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #666;
+      margin-top: 6px;
+    }
+    .inline-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #444;
+    }
+    .arrow {
+      font-size: 12px;
+      color: #666;
+      margin-right: 6px;
     }
   </style>
 </head>
@@ -159,6 +216,7 @@
     let rawData = [];
     let aggregatedData = [];
     let currentSort = { column: 'clicks', direction: 'desc' };
+    let expandedPage = null;
 
     async function loadDashboard() {
       rawData = await fetch('./daily_data.json').then(r => r.json());
@@ -167,7 +225,7 @@
       const latestDate = allDates[allDates.length - 1];
 
       document.getElementById('meta').textContent =
-        `Default view: Last 30 days ending ${latestDate}. Use the range filter to change the reporting window.`;
+        `Default view: Last 30 days ending ${latestDate}. Click any page row to see daily clicks and impressions for that page.`;
 
       setPresetRange(30, latestDate);
       applyFilters();
@@ -250,6 +308,10 @@
         };
       });
 
+      if (expandedPage && !aggregatedData.find(r => r.page === expandedPage)) {
+        expandedPage = null;
+      }
+
       updateCards();
       sortAggregatedData();
       renderTable();
@@ -279,7 +341,7 @@
 
     function updateMeta(startDate, endDate) {
       document.getElementById('meta').textContent =
-        `Showing data from ${startDate || 'earliest available'} through ${endDate || 'latest available'}. Default view is Last 30 Days.`;
+        `Showing data from ${startDate || 'earliest available'} through ${endDate || 'latest available'}. Default view is Last 30 Days. Click any page row to see daily clicks and impressions for that page.`;
     }
 
     function sortTable(column) {
@@ -317,21 +379,146 @@
       updateIndicators();
     }
 
+    function toggleExpand(page) {
+      expandedPage = expandedPage === page ? null : page;
+      renderTable();
+    }
+
     function renderTable() {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
       aggregatedData.forEach(row => {
         const tr = document.createElement('tr');
+        tr.className = 'page-row';
+        tr.onclick = () => toggleExpand(row.page);
         tr.innerHTML = `
-          <td><a href="${row.page}" target="_blank">${row.page}</a></td>
+          <td><span class="arrow">${expandedPage === row.page ? '▼' : '▶'}</span><a href="${row.page}" target="_blank" onclick="event.stopPropagation();">${row.page}</a></td>
           <td>${Number(row.clicks).toLocaleString()}</td>
           <td>${Number(row.impressions).toLocaleString()}</td>
           <td>${(Number(row.ctr) * 100).toFixed(2)}%</td>
           <td>${Number(row.position).toFixed(1)}</td>
         `;
         tbody.appendChild(tr);
+
+        if (expandedPage === row.page) {
+          const expandedTr = document.createElement('tr');
+          expandedTr.className = 'expanded-row';
+          const expandedTd = document.createElement('td');
+          expandedTd.colSpan = 5;
+          expandedTd.innerHTML = buildExpandedContent(row.page);
+          expandedTr.appendChild(expandedTd);
+          tbody.appendChild(expandedTr);
+        }
       });
+    }
+
+    function buildExpandedContent(page) {
+      const pageSeries = getPageSeries(page);
+      const clicksSvg = buildLineChart(pageSeries, 'clicks');
+      const impressionsSvg = buildLineChart(pageSeries, 'impressions');
+
+      const totalClicks = pageSeries.reduce((sum, d) => sum + Number(d.clicks || 0), 0);
+      const totalImpressions = pageSeries.reduce((sum, d) => sum + Number(d.impressions || 0), 0);
+
+      const firstDate = pageSeries.length ? pageSeries[0].date : 'N/A';
+      const lastDate = pageSeries.length ? pageSeries[pageSeries.length - 1].date : 'N/A';
+
+      return `
+        <div class="chart-wrap">
+          <div>
+            <div class="chart-title">Daily trend for selected page</div>
+            <div class="chart-meta">${page}</div>
+            <div class="inline-stats">
+              <div><strong>Date range:</strong> ${firstDate} to ${lastDate}</div>
+              <div><strong>Total clicks:</strong> ${Number(totalClicks).toLocaleString()}</div>
+              <div><strong>Total impressions:</strong> ${Number(totalImpressions).toLocaleString()}</div>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-title">Clicks by day</div>
+            ${clicksSvg}
+            <div class="chart-label-row">
+              <span>${firstDate}</span>
+              <span>${lastDate}</span>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-title">Impressions by day</div>
+            ${impressionsSvg}
+            <div class="chart-label-row">
+              <span>${firstDate}</span>
+              <span>${lastDate}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getPageSeries(page) {
+      const startDate = document.getElementById('start-date').value;
+      const endDate = document.getElementById('end-date').value;
+
+      return rawData
+        .filter(row => row.page === page)
+        .filter(row => (!startDate || row.date >= startDate) && (!endDate || row.date <= endDate))
+        .sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    function buildLineChart(series, metric) {
+      const width = 1000;
+      const height = 220;
+      const padding = 30;
+
+      if (!series.length) {
+        return `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#666" font-size="16">
+            No data available for this range
+          </text>
+        </svg>`;
+      }
+
+      const values = series.map(d => Number(d[metric] || 0));
+      const maxVal = Math.max(...values, 1);
+
+      const points = series.map((d, i) => {
+        const x = padding + (i * (width - 2 * padding)) / Math.max(series.length - 1, 1);
+        const y = height - padding - (Number(d[metric] || 0) / maxVal) * (height - 2 * padding);
+        return `${x},${y}`;
+      }).join(' ');
+
+      const circles = series.map((d, i) => {
+        const x = padding + (i * (width - 2 * padding)) / Math.max(series.length - 1, 1);
+        const y = height - padding - (Number(d[metric] || 0) / maxVal) * (height - 2 * padding);
+        const value = Number(d[metric] || 0);
+        return `<circle cx="${x}" cy="${y}" r="3" fill="#2563eb">
+          <title>${d.date}: ${value.toLocaleString()} ${metric}</title>
+        </circle>`;
+      }).join('');
+
+      const gridLines = [0, 0.25, 0.5, 0.75, 1].map(r => {
+        const y = height - padding - r * (height - 2 * padding);
+        const label = Math.round(r * maxVal);
+        return `
+          <line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="#e5e7eb" stroke-width="1" />
+          <text x="${padding - 8}" y="${y + 4}" text-anchor="end" fill="#666" font-size="11">${label}</text>
+        `;
+      }).join('');
+
+      return `
+        <svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+          ${gridLines}
+          <polyline
+            fill="none"
+            stroke="#2563eb"
+            stroke-width="3"
+            points="${points}"
+          />
+          ${circles}
+        </svg>
+      `;
     }
 
     function updateIndicators() {
