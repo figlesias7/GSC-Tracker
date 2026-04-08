@@ -49,11 +49,21 @@
     }
     th {
       background: #f3f3f3;
+      cursor: pointer;
+      user-select: none;
+    }
+    th:hover {
+      background: #e9e9e9;
     }
     .small {
       color: #666;
       font-size: 14px;
       margin-bottom: 20px;
+    }
+    .sort-indicator {
+      font-size: 12px;
+      margin-left: 6px;
+      color: #666;
     }
   </style>
 </head>
@@ -84,17 +94,20 @@
   <table>
     <thead>
       <tr>
-        <th>Page</th>
-        <th>Clicks</th>
-        <th>Impressions</th>
-        <th>CTR</th>
-        <th>Position</th>
+        <th onclick="sortTable('page')">Page <span class="sort-indicator" id="page-indicator"></span></th>
+        <th onclick="sortTable('clicks')">Clicks <span class="sort-indicator" id="clicks-indicator"></span></th>
+        <th onclick="sortTable('impressions')">Impressions <span class="sort-indicator" id="impressions-indicator"></span></th>
+        <th onclick="sortTable('ctr')">CTR <span class="sort-indicator" id="ctr-indicator"></span></th>
+        <th onclick="sortTable('position')">Position <span class="sort-indicator" id="position-indicator"></span></th>
       </tr>
     </thead>
     <tbody id="table-body"></tbody>
   </table>
 
   <script>
+    let tableData = [];
+    let currentSort = { column: 'clicks', direction: 'desc' };
+
     async function loadDashboard() {
       const summary = await fetch('./summary.json').then(r => r.json());
       const topPages = await fetch('./top_pages.json').then(r => r.json());
@@ -107,10 +120,16 @@
       document.getElementById('position').textContent = Number(summary.avg_position).toFixed(1);
       document.getElementById('pages').textContent = Number(summary.total_pages).toLocaleString();
 
+      tableData = topPages;
+      renderTable();
+      updateIndicators();
+    }
+
+    function renderTable() {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
-      topPages.forEach(row => {
+      tableData.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><a href="${row.page}" target="_blank">${row.page}</a></td>
@@ -120,6 +139,46 @@
           <td>${Number(row.position).toFixed(1)}</td>
         `;
         tbody.appendChild(tr);
+      });
+    }
+
+    function sortTable(column) {
+      if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.column = column;
+        currentSort.direction = column === 'page' ? 'asc' : 'desc';
+      }
+
+      tableData.sort((a, b) => {
+        let aVal = a[column];
+        let bVal = b[column];
+
+        if (column === 'page') {
+          aVal = String(aVal).toLowerCase();
+          bVal = String(bVal).toLowerCase();
+          if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+          if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+          return 0;
+        } else {
+          aVal = Number(aVal);
+          bVal = Number(bVal);
+          return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+      });
+
+      renderTable();
+      updateIndicators();
+    }
+
+    function updateIndicators() {
+      const columns = ['page', 'clicks', 'impressions', 'ctr', 'position'];
+      columns.forEach(col => {
+        const el = document.getElementById(`${col}-indicator`);
+        if (!el) return;
+        el.textContent = currentSort.column === col
+          ? (currentSort.direction === 'asc' ? '▲' : '▼')
+          : '';
       });
     }
 
