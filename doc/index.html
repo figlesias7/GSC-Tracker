@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GSC Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.4;
+    }
+    h1, h2 {
+      margin-bottom: 10px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 16px;
+      background: #fafafa;
+    }
+    .label {
+      font-size: 14px;
+      color: #666;
+    }
+    .value {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background: #f3f3f3;
+    }
+    .small {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Google Search Console Dashboard</h1>
+  <div class="small" id="meta">Loading...</div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">Total Clicks</div>
+      <div class="value" id="clicks">-</div>
+    </div>
+    <div class="card">
+      <div class="label">Total Impressions</div>
+      <div class="value" id="impressions">-</div>
+    </div>
+    <div class="card">
+      <div class="label">Average Position</div>
+      <div class="value" id="position">-</div>
+    </div>
+    <div class="card">
+      <div class="label">Pages Tracked</div>
+      <div class="value" id="pages">-</div>
+    </div>
+  </div>
+
+  <h2>Top Pages</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Page</th>
+        <th>Clicks</th>
+        <th>Impressions</th>
+        <th>CTR</th>
+        <th>Position</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+
+  <script>
+    async function loadDashboard() {
+      const summary = await fetch('./summary.json').then(r => r.json());
+      const topPages = await fetch('./top_pages.json').then(r => r.json());
+
+      document.getElementById('meta').textContent =
+        `Site: ${summary.site} | Snapshot date: ${summary.snapshot_date}`;
+
+      document.getElementById('clicks').textContent = Number(summary.total_clicks).toLocaleString();
+      document.getElementById('impressions').textContent = Number(summary.total_impressions).toLocaleString();
+      document.getElementById('position').textContent = Number(summary.avg_position).toFixed(1);
+      document.getElementById('pages').textContent = Number(summary.total_pages).toLocaleString();
+
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      topPages.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><a href="${row.page}" target="_blank">${row.page}</a></td>
+          <td>${Number(row.clicks).toLocaleString()}</td>
+          <td>${Number(row.impressions).toLocaleString()}</td>
+          <td>${(Number(row.ctr) * 100).toFixed(2)}%</td>
+          <td>${Number(row.position).toFixed(1)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
