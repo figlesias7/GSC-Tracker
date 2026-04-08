@@ -7,13 +7,18 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 40px auto;
       padding: 0 20px;
       line-height: 1.4;
     }
     h1, h2 {
       margin-bottom: 10px;
+    }
+    .small {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 20px;
     }
     .cards {
       display: grid;
@@ -36,22 +41,23 @@
       font-weight: bold;
       margin-top: 6px;
     }
-    .small {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
     .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
       margin: 20px 0 12px 0;
     }
-    .search-input {
-      width: 100%;
-      max-width: 500px;
+    .search-input, .date-input, .select-input, .button-input {
       padding: 10px 12px;
       font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 8px;
       box-sizing: border-box;
+    }
+    .search-input {
+      min-width: 320px;
+      flex: 1;
     }
     .results-count {
       margin-top: 8px;
@@ -110,7 +116,7 @@
     </div>
   </div>
 
-  <h2>Top Pages</h2>
+  <h2>Pages</h2>
 
   <div class="controls">
     <input
@@ -118,10 +124,23 @@
       id="search-box"
       class="search-input"
       placeholder="Search pages by URL, slug, city, or keyword"
-      oninput="applySearch()"
+      oninput="applyFilters()"
     />
-    <div class="results-count" id="results-count">Showing 0 pages</div>
+
+    <select id="range-select" class="select-input" onchange="handleRangeChange()">
+      <option value="1">Last Day</option>
+      <option value="7">Last 7 Days</option>
+      <option value="30" selected>Last 30 Days</option>
+      <option value="custom">Custom</option>
+    </select>
+
+    <input type="date" id="start-date" class="date-input" />
+    <input type="date" id="end-date" class="date-input" />
+
+    <button class="button-input" onclick="applyFilters()">Apply</button>
   </div>
+
+  <div class="results-count" id="results-count">Showing 0 pages</div>
 
   <table>
     <thead>
@@ -137,41 +156,130 @@
   </table>
 
   <script>
-    let allData = [];
-    let filteredData = [];
+    let rawData = [];
+    let aggregatedData = [];
     let currentSort = { column: 'clicks', direction: 'desc' };
 
     async function loadDashboard() {
-      const summary = await fetch('./summary.json').then(r => r.json());
-      const topPages = await fetch('./top_pages.json').then(r => r.json());
+      rawData = await fetch('./daily_data.json').then(r => r.json());
+
+      const allDates = rawData.map(r => r.date).filter(Boolean).sort();
+      const latestDate = allDates[allDates.length - 1];
 
       document.getElementById('meta').textContent =
-        `Site: ${summary.site} | Snapshot date: ${summary.snapshot_date}`;
+        `Default view: Last 30 days ending ${latestDate}. Use the range filter to change the reporting window.`;
 
-      document.getElementById('clicks').textContent = Number(summary.total_clicks).toLocaleString();
-      document.getElementById('impressions').textContent = Number(summary.total_impressions).toLocaleString();
-      document.getElementById('position').textContent = Number(summary.avg_position).toFixed(1);
-      document.getElementById('pages').textContent = Number(summary.total_pages).toLocaleString();
-
-      allData = topPages;
-      applySearch();
-      updateIndicators();
+      setPresetRange(30, latestDate);
+      applyFilters();
     }
 
-    function applySearch() {
-      const query = document.getElementById('search-box').value.trim().toLowerCase();
+    function handleRangeChange() {
+      const value = document.getElementById('range-select').value;
+      const allDates = rawData.map(r => r.date).filter(Boolean).sort();
+      const latestDate = allDates[allDates.length - 1];
 
-      if (!query) {
-        filteredData = [...allData];
-      } else {
-        filteredData = allData.filter(row =>
-          String(row.page).toLowerCase().includes(query)
-        );
+      if (value === 'custom') {
+        return;
       }
 
-      sortFilteredData();
+      setPresetRange(Number(value), latestDate);
+      applyFilters();
+    }
+
+    function setPresetRange(days, latestDateStr) {
+      const latestDate = new Date(latestDateStr + 'T00:00:00');
+      const startDate = new Date(latestDate);
+      startDate.setDate(startDate.getDate() - (days - 1));
+
+      document.getElementById('start-date').value = formatDateLocal(startDate);
+      document.getElementById('end-date').value = latestDateStr;
+    }
+
+    function formatDateLocal(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function applyFilters() {
+      const query = document.getElementById('search-box').value.trim().toLowerCase();
+      const startDate = document.getElementById('start-date').value;
+      const endDate = document.getElementById('end-date').value;
+
+      let filtered = rawData.filter(row => {
+        const matchesQuery = !query || String(row.page).toLowerCase().includes(query);
+        const matchesStart = !startDate || row.date >= startDate;
+        const matchesEnd = !endDate || row.date <= endDate;
+        return matchesQuery && matchesStart && matchesEnd;
+      });
+
+      const grouped = {};
+
+      filtered.forEach(row => {
+        const page = row.page;
+        if (!grouped[page]) {
+          grouped[page] = {
+            page: page,
+            clicks: 0,
+            impressions: 0,
+            weightedPositionSum: 0,
+            positionWeight: 0
+          };
+        }
+
+        grouped[page].clicks += Number(row.clicks || 0);
+        grouped[page].impressions += Number(row.impressions || 0);
+
+        const impressions = Number(row.impressions || 0);
+        const position = Number(row.position || 0);
+        grouped[page].weightedPositionSum += position * impressions;
+        grouped[page].positionWeight += impressions;
+      });
+
+      aggregatedData = Object.values(grouped).map(row => {
+        const ctr = row.impressions > 0 ? row.clicks / row.impressions : 0;
+        const position = row.positionWeight > 0 ? row.weightedPositionSum / row.positionWeight : 0;
+
+        return {
+          page: row.page,
+          clicks: row.clicks,
+          impressions: row.impressions,
+          ctr: ctr,
+          position: position
+        };
+      });
+
+      updateCards();
+      sortAggregatedData();
       renderTable();
       updateResultsCount();
+      updateMeta(startDate, endDate);
+    }
+
+    function updateCards() {
+      const totalClicks = aggregatedData.reduce((sum, row) => sum + Number(row.clicks || 0), 0);
+      const totalImpressions = aggregatedData.reduce((sum, row) => sum + Number(row.impressions || 0), 0);
+      const totalPages = aggregatedData.length;
+
+      let weightedPositionSum = 0;
+      let totalWeight = 0;
+      aggregatedData.forEach(row => {
+        weightedPositionSum += Number(row.position || 0) * Number(row.impressions || 0);
+        totalWeight += Number(row.impressions || 0);
+      });
+
+      const avgPosition = totalWeight > 0 ? weightedPositionSum / totalWeight : 0;
+
+      document.getElementById('clicks').textContent = totalClicks.toLocaleString();
+      document.getElementById('impressions').textContent = totalImpressions.toLocaleString();
+      document.getElementById('position').textContent = avgPosition.toFixed(1);
+      document.getElementById('pages').textContent = totalPages.toLocaleString();
+    }
+
+    function updateMeta(startDate, endDate) {
+      document.getElementById('meta').textContent =
+        `Showing data from ${startDate || 'earliest available'} through ${endDate || 'latest available'}. Default view is Last 30 Days.`;
     }
 
     function sortTable(column) {
@@ -182,13 +290,13 @@
         currentSort.direction = column === 'page' ? 'asc' : 'desc';
       }
 
-      sortFilteredData();
+      sortAggregatedData();
       renderTable();
       updateIndicators();
     }
 
-    function sortFilteredData() {
-      filteredData.sort((a, b) => {
+    function sortAggregatedData() {
+      aggregatedData.sort((a, b) => {
         let aVal = a[currentSort.column];
         let bVal = b[currentSort.column];
 
@@ -205,13 +313,15 @@
           return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
         }
       });
+
+      updateIndicators();
     }
 
     function renderTable() {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
-      filteredData.forEach(row => {
+      aggregatedData.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><a href="${row.page}" target="_blank">${row.page}</a></td>
@@ -236,7 +346,7 @@
     }
 
     function updateResultsCount() {
-      const count = filteredData.length;
+      const count = aggregatedData.length;
       document.getElementById('results-count').textContent =
         `Showing ${count.toLocaleString()} page${count === 1 ? '' : 's'}`;
     }
