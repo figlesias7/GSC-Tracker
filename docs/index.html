@@ -36,6 +36,28 @@
       font-weight: bold;
       margin-top: 6px;
     }
+    .small {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .controls {
+      margin: 20px 0 12px 0;
+    }
+    .search-input {
+      width: 100%;
+      max-width: 500px;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    .results-count {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #666;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -55,15 +77,13 @@
     th:hover {
       background: #e9e9e9;
     }
-    .small {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
     .sort-indicator {
       font-size: 12px;
       margin-left: 6px;
       color: #666;
+    }
+    a {
+      word-break: break-word;
     }
   </style>
 </head>
@@ -91,6 +111,18 @@
   </div>
 
   <h2>Top Pages</h2>
+
+  <div class="controls">
+    <input
+      type="text"
+      id="search-box"
+      class="search-input"
+      placeholder="Search pages by URL, slug, city, or keyword"
+      oninput="applySearch()"
+    />
+    <div class="results-count" id="results-count">Showing 0 pages</div>
+  </div>
+
   <table>
     <thead>
       <tr>
@@ -105,7 +137,8 @@
   </table>
 
   <script>
-    let tableData = [];
+    let allData = [];
+    let filteredData = [];
     let currentSort = { column: 'clicks', direction: 'desc' };
 
     async function loadDashboard() {
@@ -120,16 +153,65 @@
       document.getElementById('position').textContent = Number(summary.avg_position).toFixed(1);
       document.getElementById('pages').textContent = Number(summary.total_pages).toLocaleString();
 
-      tableData = topPages;
+      allData = topPages;
+      applySearch();
+      updateIndicators();
+    }
+
+    function applySearch() {
+      const query = document.getElementById('search-box').value.trim().toLowerCase();
+
+      if (!query) {
+        filteredData = [...allData];
+      } else {
+        filteredData = allData.filter(row =>
+          String(row.page).toLowerCase().includes(query)
+        );
+      }
+
+      sortFilteredData();
+      renderTable();
+      updateResultsCount();
+    }
+
+    function sortTable(column) {
+      if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.column = column;
+        currentSort.direction = column === 'page' ? 'asc' : 'desc';
+      }
+
+      sortFilteredData();
       renderTable();
       updateIndicators();
+    }
+
+    function sortFilteredData() {
+      filteredData.sort((a, b) => {
+        let aVal = a[currentSort.column];
+        let bVal = b[currentSort.column];
+
+        if (currentSort.column === 'page') {
+          aVal = String(aVal).toLowerCase();
+          bVal = String(bVal).toLowerCase();
+
+          if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+          if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+          return 0;
+        } else {
+          aVal = Number(aVal);
+          bVal = Number(bVal);
+          return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+      });
     }
 
     function renderTable() {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
-      tableData.forEach(row => {
+      filteredData.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><a href="${row.page}" target="_blank">${row.page}</a></td>
@@ -142,35 +224,6 @@
       });
     }
 
-    function sortTable(column) {
-      if (currentSort.column === column) {
-        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-      } else {
-        currentSort.column = column;
-        currentSort.direction = column === 'page' ? 'asc' : 'desc';
-      }
-
-      tableData.sort((a, b) => {
-        let aVal = a[column];
-        let bVal = b[column];
-
-        if (column === 'page') {
-          aVal = String(aVal).toLowerCase();
-          bVal = String(bVal).toLowerCase();
-          if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
-          if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
-          return 0;
-        } else {
-          aVal = Number(aVal);
-          bVal = Number(bVal);
-          return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
-        }
-      });
-
-      renderTable();
-      updateIndicators();
-    }
-
     function updateIndicators() {
       const columns = ['page', 'clicks', 'impressions', 'ctr', 'position'];
       columns.forEach(col => {
@@ -180,6 +233,12 @@
           ? (currentSort.direction === 'asc' ? '▲' : '▼')
           : '';
       });
+    }
+
+    function updateResultsCount() {
+      const count = filteredData.length;
+      document.getElementById('results-count').textContent =
+        `Showing ${count.toLocaleString()} page${count === 1 ? '' : 's'}`;
     }
 
     loadDashboard();
