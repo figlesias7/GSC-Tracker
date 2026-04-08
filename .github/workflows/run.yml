@@ -34,6 +34,6 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git add data docs
+          git add data docs app.py
           git diff --cached --quiet || git commit -m "Update GSC dashboard data"
           git push
