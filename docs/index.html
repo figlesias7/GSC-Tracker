@@ -148,6 +148,27 @@
       color: #666;
       margin-right: 6px;
     }
+    .zero-section {
+      margin-top: 40px;
+    }
+    .zero-box {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 16px;
+      background: #fafafa;
+    }
+    .zero-count {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    .zero-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .zero-list li {
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
@@ -213,6 +234,14 @@
     <tbody id="table-body"></tbody>
   </table>
 
+  <div class="zero-section">
+    <h2>Pages with Zero Impressions</h2>
+    <div class="zero-box">
+      <div class="zero-count" id="zero-pages-count">Loading...</div>
+      <div id="zero-pages-container">Loading...</div>
+    </div>
+  </div>
+
   <script>
     let rawData = [];
     let aggregatedData = [];
@@ -231,6 +260,7 @@
 
       setPresetRange(30, latestDate);
       applyFilters();
+      loadZeroPages();
     }
 
     function handleRangeChange() {
@@ -546,6 +576,32 @@
       const count = aggregatedData.length;
       document.getElementById('results-count').textContent =
         `Showing ${count.toLocaleString()} page${count === 1 ? '' : 's'}`;
+    }
+
+    async function loadZeroPages() {
+      try {
+        const pages = await fetch('./zero_pages.json').then(r => r.json());
+        const container = document.getElementById('zero-pages-container');
+        const countEl = document.getElementById('zero-pages-count');
+
+        countEl.textContent = `${pages.length.toLocaleString()} page${pages.length === 1 ? '' : 's'} with zero impressions so far`;
+
+        if (!pages.length) {
+          container.innerHTML = 'All pages currently have impressions.';
+          return;
+        }
+
+        let html = '<ul class="zero-list">';
+        pages.forEach(page => {
+          html += `<li><a href="${page}" target="_blank">${page}</a></li>`;
+        });
+        html += '</ul>';
+
+        container.innerHTML = html;
+      } catch (e) {
+        document.getElementById('zero-pages-count').textContent = 'No zero-impression data available yet';
+        document.getElementById('zero-pages-container').innerHTML = 'No data available yet.';
+      }
     }
 
     loadDashboard();
