@@ -1,6 +1,8 @@
 import os
 import json
+import requests
 import pandas as pd
+import xml.etree.ElementTree as ET
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from datetime import date, timedelta
@@ -63,4 +65,72 @@ df.to_csv("data/gsc_daily_data.csv", index=False)
 # Save JSON for dashboard
 df.to_json("docs/daily_data.json", orient="records", indent=2)
 
-print("Daily page-level GSC data exported successfully")
+def get_sitemap_pages_from_xml(xml_text):
+    root = ET.fromstring(xml_text)
+
+    # Regular sitemap
+    if root.tag.endswith("urlset"):
+        pages = []
+        for child in root:
+            for sub in child:
+                if sub.tag.endswith("loc") and sub.text:
+                    pages.append(sub.text.strip())
+        return pages
+
+    # Sitemap index
+    if root.tag.endswith("sitemapindex"):
+        sitemaps = []
+        for child in root:
+            for sub in child:
+                if sub.tag.endswith("loc") and sub.text:
+                    sitemaps.append(sub.text.strip())
+        return sitemaps
+
+    return []
+
+def fetch_sitemap_urls(sitemap_url, visited=None):
+    if visited is None:
+        visited = set()
+
+    if sitemap_url in visited:
+        return []
+
+    visited.add(sitemap_url)
+
+    try:
+        response = requests.get(sitemap_url, timeout=20)
+        response.raise_for_status()
+        items = get_sitemap_pages_from_xml(response.text)
+
+        # If this is a sitemap index, recursively fetch child sitemaps
+        if items and items[0].endswith(".xml"):
+            all_pages = []
+            for child_sitemap in items:
+                all_pages.extend(fetch_sitemap_urls(child_sitemap, visited))
+            return all_pages
+
+        return items
+    except Exception as e:
+        print(f"Sitemap fetch failed for {sitemap_url}: {e}")
+        return []
+
+# Pull pages from sitemap
+sitemap_url = SITE_URL.rstrip("/") + "/sitemap.xml"
+all_pages = fetch_sitemap_urls(sitemap_url)
+
+# Normalize both sets by trimming trailing slash for comparison
+pages_with_data = set(
+    str(page).rstrip("/")
+    for page in df["page"].dropna().unique()
+)
+
+zero_pages = []
+for page in all_pages:
+    normalized = str(page).rstrip("/")
+    if normalized not in pages_with_data:
+        zero_pages.append(page)
+
+with open("docs/zero_pages.json", "w", encoding="utf-8") as f:
+    json.dump(sorted(set(zero_pages)), f, indent=2)
+
+print("Daily page-level GSC data and zero-impression page list exported successfully")
