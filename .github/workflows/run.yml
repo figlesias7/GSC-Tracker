@@ -2,8 +2,7 @@ name: GSC Export
 
 on:
   schedule:
-    - cron: '0 10 * * *'
-    - cron: '0 22 * * *'
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -23,7 +22,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install pandas google-api-python-client google-auth
+        run: pip install pandas google-api-python-client google-auth requests
 
       - name: Run script
         env:
