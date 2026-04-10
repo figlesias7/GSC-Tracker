@@ -1,5 +1,13 @@
 [
   {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/",
+    "clicks":3,
+    "impressions":7,
+    "ctr":0.4285714286,
+    "position":1.2857142857
+  },
+  {
     "date":"2026-03-10",
     "page":"https:\/\/workingwithhouses.com\/",
     "clicks":1,
@@ -118,6 +126,14 @@
     "impressions":4,
     "ctr":0.25,
     "position":6.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/reviews\/",
+    "clicks":1,
+    "impressions":1,
+    "ctr":1.0,
+    "position":2.0
   },
   {
     "date":"2026-03-08",
@@ -4150,5 +4166,117 @@
     "impressions":11,
     "ctr":0.0,
     "position":56.0909090909
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/about\/our-company\/",
+    "clicks":0,
+    "impressions":2,
+    "ctr":0.0,
+    "position":2.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/about\/what-we-do\/",
+    "clicks":0,
+    "impressions":2,
+    "ctr":0.0,
+    "position":2.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/atlanta-cant-sell-house\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":6.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/cant-sell-house\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":4.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/chattanooga-cant-sell-house\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":9.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/hoa-issues\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":11.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/house-didnt-sell\/",
+    "clicks":0,
+    "impressions":26,
+    "ctr":0.0,
+    "position":71.5
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/how-it-works\/",
+    "clicks":0,
+    "impressions":7,
+    "ctr":0.0,
+    "position":4.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/property-finders\/",
+    "clicks":0,
+    "impressions":2,
+    "ctr":0.0,
+    "position":2.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/sell-house-fast-georgia\/",
+    "clicks":0,
+    "impressions":2,
+    "ctr":0.0,
+    "position":2.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/sell-the-house-fast\/",
+    "clicks":0,
+    "impressions":3,
+    "ctr":0.0,
+    "position":5.6666666667
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/selling-house-for-job-relocation\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":37.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/stop-foreclosure-fast\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":49.0
+  },
+  {
+    "date":"2026-04-08",
+    "page":"https:\/\/workingwithhouses.com\/tired-landlord\/",
+    "clicks":0,
+    "impressions":4,
+    "ctr":0.0,
+    "position":11.5
   }
 ]
