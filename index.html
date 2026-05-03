@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GSC Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.4;
+    }
+    h1, h2 {
+      margin-bottom: 10px;
+    }
+    .small {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 16px;
+      background: #fafafa;
+    }
+    .label {
+      font-size: 14px;
+      color: #666;
+    }
+    .value {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin: 20px 0 12px 0;
+    }
+    .search-input, .date-input, .select-input, .button-input {
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    .search-input {
+      min-width: 320px;
+      flex: 1;
+    }
+    .results-count {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #666;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+    th {
+      background: #f3f3f3;
+      cursor: pointer;
+      user-select: none;
+    }
+    th:hover {
+      background: #e9e9e9;
+    }
+    .sort-indicator {
+      font-size: 12px;
+      margin-left: 6px;
+      color: #666;
+    }
+    a {
+      word-break: break-word;
+    }
+    .page-row {
+      cursor: pointer;
+    }
+    .page-row:hover {
+      background: #fafafa;
+    }
+    .expanded-row td {
+      background: #fcfcfc;
+      padding: 18px;
+    }
+    .chart-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .chart-title {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .chart-meta {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .chart-box {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 12px;
+      background: white;
+    }
+    .chart-svg {
+      width: 100%;
+      height: 220px;
+      display: block;
+    }
+    .chart-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #666;
+      margin-top: 6px;
+    }
+    .inline-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #444;
+    }
+    .arrow {
+      font-size: 12px;
+      color: #666;
+      margin-right: 6px;
+    }
+    .zero-section {
+      margin-top: 40px;
+    }
+    .zero-box {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 16px;
+      background: #fafafa;
+    }
+    .zero-count {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    .zero-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .zero-list li {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Google Search Console Dashboard</h1>
+  <div class="small" id="meta">Loading...</div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">Total Clicks</div>
+      <div class="value" id="clicks">-</div>
+    </div>
+    <div class="card">
+      <div class="label">Total Impressions</div>
+      <div class="value" id="impressions">-</div>
+    </div>
+    <div class="card">
+      <div class="label">Average Position</div>
+      <div class="value" id="position">-</div>
+    </div>
+    <div class="card">
+      <div class="label">Pages Tracked</div>
+      <div class="value" id="pages">-</div>
+    </div>
+  </div>
+
+  <h2>Pages</h2>
+
+  <div class="controls">
+    <input
+      type="text"
+      id="search-box"
+      class="search-input"
+      placeholder="Search pages by URL, slug, city, or keyword"
+      oninput="applyFilters()"
+    />
+
+    <select id="range-select" class="select-input" onchange="handleRangeChange()">
+      <option value="1">Last Day</option>
+      <option value="7">Last 7 Days</option>
+      <option value="30" selected>Last 30 Days</option>
+      <option value="all">All Time</option>
+      <option value="custom">Custom</option>
+    </select>
+
+    <input type="date" id="start-date" class="date-input" />
+    <input type="date" id="end-date" class="date-input" />
+
+    <button class="button-input" onclick="applyFilters()">Apply</button>
+  </div>
+
+  <div class="results-count" id="results-count">Showing 0 pages</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th onclick="sortTable('page')">Page <span class="sort-indicator" id="page-indicator"></span></th>
+        <th onclick="sortTable('clicks')">Clicks <span class="sort-indicator" id="clicks-indicator"></span></th>
+        <th onclick="sortTable('impressions')">Impressions <span class="sort-indicator" id="impressions-indicator"></span></th>
+        <th onclick="sortTable('ctr')">CTR <span class="sort-indicator" id="ctr-indicator"></span></th>
+        <th onclick="sortTable('position')">Position <span class="sort-indicator" id="position-indicator"></span></th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+
+  <div class="zero-section">
+    <h2>Pages with Zero Impressions</h2>
+    <div class="zero-box">
+      <div class="zero-count" id="zero-pages-count">Loading...</div>
+      <div id="zero-pages-container">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    let rawData = [];
+    let aggregatedData = [];
+    let currentSort = { column: 'clicks', direction: 'desc' };
+    let expandedPage = null;
+
+    async function loadDashboard() {
+      rawData = await fetch('./daily_data.json').then(r => r.json());
+
+      const allDates = rawData.map(r => r.date).filter(Boolean).sort();
+      const latestDate = allDates[allDates.length - 1];
+      const earliestDate = allDates[0];
+
+      document.getElementById('meta').textContent =
+        `Default view: Last 30 days ending ${latestDate}. Use "All Time" to view full history from ${earliestDate}. Click any page row to see daily clicks and impressions for that page.`;
+
+      setPresetRange(30, latestDate);
+      applyFilters();
+      loadZeroPages();
+    }
+
+    function handleRangeChange() {
+      const value = document.getElementById('range-select').value;
+      const allDates = rawData.map(r => r.date).filter(Boolean).sort();
+      const earliestDate = allDates[0];
+      const latestDate = allDates[allDates.length - 1];
+
+      if (value === 'custom') {
+        return;
+      }
+
+      if (value === 'all') {
+        document.getElementById('start-date').value = earliestDate;
+        document.getElementById('end-date').value = latestDate;
+        applyFilters();
+        return;
+      }
+
+      setPresetRange(Number(value), latestDate);
+      applyFilters();
+    }
+
+    function setPresetRange(days, latestDateStr) {
+      const latestDate = new Date(latestDateStr + 'T00:00:00');
+      const startDate = new Date(latestDate);
+      startDate.setDate(startDate.getDate() - (days - 1));
+
+      document.getElementById('start-date').value = formatDateLocal(startDate);
+      document.getElementById('end-date').value = latestDateStr;
+    }
+
+    function formatDateLocal(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function applyFilters() {
+      const query = document.getElementById('search-box').value.trim().toLowerCase();
+      const startDate = document.getElementById('start-date').value;
+      const endDate = document.getElementById('end-date').value;
+
+      let filtered = rawData.filter(row => {
+        const matchesQuery = !query || String(row.page).toLowerCase().includes(query);
+        const matchesStart = !startDate || row.date >= startDate;
+        const matchesEnd = !endDate || row.date <= endDate;
+        return matchesQuery && matchesStart && matchesEnd;
+      });
+
+      const grouped = {};
+
+      filtered.forEach(row => {
+        const page = row.page;
+        if (!grouped[page]) {
+          grouped[page] = {
+            page: page,
+            clicks: 0,
+            impressions: 0,
+            weightedPositionSum: 0,
+            positionWeight: 0
+          };
+        }
+
+        grouped[page].clicks += Number(row.clicks || 0);
+        grouped[page].impressions += Number(row.impressions || 0);
+
+        const impressions = Number(row.impressions || 0);
+        const position = Number(row.position || 0);
+        grouped[page].weightedPositionSum += position * impressions;
+        grouped[page].positionWeight += impressions;
+      });
+
+      aggregatedData = Object.values(grouped).map(row => {
+        const ctr = row.impressions > 0 ? row.clicks / row.impressions : 0;
+        const position = row.positionWeight > 0 ? row.weightedPositionSum / row.positionWeight : 0;
+
+        return {
+          page: row.page,
+          clicks: row.clicks,
+          impressions: row.impressions,
+          ctr: ctr,
+          position: position
+        };
+      });
+
+      if (expandedPage && !aggregatedData.find(r => r.page === expandedPage)) {
+        expandedPage = null;
+      }
+
+      updateCards();
+      sortAggregatedData();
+      renderTable();
+      updateResultsCount();
+      updateMeta(startDate, endDate);
+    }
+
+    function updateCards() {
+      const totalClicks = aggregatedData.reduce((sum, row) => sum + Number(row.clicks || 0), 0);
+      const totalImpressions = aggregatedData.reduce((sum, row) => sum + Number(row.impressions || 0), 0);
+      const totalPages = aggregatedData.length;
+
+      let weightedPositionSum = 0;
+      let totalWeight = 0;
+      aggregatedData.forEach(row => {
+        weightedPositionSum += Number(row.position || 0) * Number(row.impressions || 0);
+        totalWeight += Number(row.impressions || 0);
+      });
+
+      const avgPosition = totalWeight > 0 ? weightedPositionSum / totalWeight : 0;
+
+      document.getElementById('clicks').textContent = totalClicks.toLocaleString();
+      document.getElementById('impressions').textContent = totalImpressions.toLocaleString();
+      document.getElementById('position').textContent = avgPosition.toFixed(1);
+      document.getElementById('pages').textContent = totalPages.toLocaleString();
+    }
+
+    function updateMeta(startDate, endDate) {
+      document.getElementById('meta').textContent =
+        `Showing data from ${startDate || 'earliest available'} through ${endDate || 'latest available'}. Default view is Last 30 Days. Use "All Time" to view full history. Click any page row to see daily clicks and impressions for that page.`;
+    }
+
+    function sortTable(column) {
+      if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.column = column;
+        currentSort.direction = column === 'page' ? 'asc' : 'desc';
+      }
+
+      sortAggregatedData();
+      renderTable();
+      updateIndicators();
+    }
+
+    function sortAggregatedData() {
+      aggregatedData.sort((a, b) => {
+        let aVal = a[currentSort.column];
+        let bVal = b[currentSort.column];
+
+        if (currentSort.column === 'page') {
+          aVal = String(aVal).toLowerCase();
+          bVal = String(bVal).toLowerCase();
+
+          if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+          if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+          return 0;
+        } else {
+          aVal = Number(aVal);
+          bVal = Number(bVal);
+          return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+      });
+
+      updateIndicators();
+    }
+
+    function toggleExpand(page) {
+      expandedPage = expandedPage === page ? null : page;
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      aggregatedData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = 'page-row';
+        tr.onclick = () => toggleExpand(row.page);
+        tr.innerHTML = `
+          <td><span class="arrow">${expandedPage === row.page ? '▼' : '▶'}</span><a href="${row.page}" target="_blank" onclick="event.stopPropagation();">${row.page}</a></td>
+          <td>${Number(row.clicks).toLocaleString()}</td>
+          <td>${Number(row.impressions).toLocaleString()}</td>
+          <td>${(Number(row.ctr) * 100).toFixed(2)}%</td>
+          <td>${Number(row.position).toFixed(1)}</td>
+        `;
+        tbody.appendChild(tr);
+
+        if (expandedPage === row.page) {
+          const expandedTr = document.createElement('tr');
+          expandedTr.className = 'expanded-row';
+          const expandedTd = document.createElement('td');
+          expandedTd.colSpan = 5;
+          expandedTd.innerHTML = buildExpandedContent(row.page);
+          expandedTr.appendChild(expandedTd);
+          tbody.appendChild(expandedTr);
+        }
+      });
+    }
+
+    function buildExpandedContent(page) {
+      const pageSeries = getPageSeries(page);
+      const clicksSvg = buildLineChart(pageSeries, 'clicks');
+      const impressionsSvg = buildLineChart(pageSeries, 'impressions');
+      const positionSvg = buildLineChart(pageSeries, 'position', true);
+
+      const totalClicks = pageSeries.reduce((sum, d) => sum + Number(d.clicks || 0), 0);
+      const totalImpressions = pageSeries.reduce((sum, d) => sum + Number(d.impressions || 0), 0);
+
+      let weightedPositionSum = 0;
+      let totalPositionWeight = 0;
+      pageSeries.forEach(d => {
+        const impressions = Number(d.impressions || 0);
+        const position = Number(d.position || 0);
+        weightedPositionSum += position * impressions;
+        totalPositionWeight += impressions;
+      });
+      const avgPosition = totalPositionWeight > 0 ? weightedPositionSum / totalPositionWeight : 0;
+
+      const firstDate = pageSeries.length ? pageSeries[0].date : 'N/A';
+      const lastDate = pageSeries.length ? pageSeries[pageSeries.length - 1].date : 'N/A';
+
+      return `
+        <div class="chart-wrap">
+          <div>
+            <div class="chart-title">Daily trend for selected page</div>
+            <div class="chart-meta">${page}</div>
+            <div class="inline-stats">
+              <div><strong>Date range:</strong> ${firstDate} to ${lastDate}</div>
+              <div><strong>Total clicks:</strong> ${Number(totalClicks).toLocaleString()}</div>
+              <div><strong>Total impressions:</strong> ${Number(totalImpressions).toLocaleString()}</div>
+              <div><strong>Average position:</strong> ${avgPosition.toFixed(1)}</div>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-title">Clicks by day</div>
+            ${clicksSvg}
+            <div class="chart-label-row">
+              <span>${firstDate}</span>
+              <span>${lastDate}</span>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-title">Impressions by day</div>
+            ${impressionsSvg}
+            <div class="chart-label-row">
+              <span>${firstDate}</span>
+              <span>${lastDate}</span>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-title">Position by day (lower is better)</div>
+            ${positionSvg}
+            <div class="chart-label-row">
+              <span>${firstDate}</span>
+              <span>${lastDate}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getPageSeries(page) {
+      const startDate = document.getElementById('start-date').value;
+      const endDate = document.getElementById('end-date').value;
+
+      return rawData
+        .filter(row => row.page === page)
+        .filter(row => (!startDate || row.date >= startDate) && (!endDate || row.date <= endDate))
+        .sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    function buildLineChart(series, metric, invert = false) {
+      const width = 1000;
+      const height = 220;
+      const padding = 30;
+
+      if (!series.length) {
+        return `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#666" font-size="16">
+            No data available for this range
+          </text>
+        </svg>`;
+      }
+
+      const values = series.map(d => Number(d[metric] || 0));
+      const minVal = Math.min(...values);
+      const maxVal = Math.max(...values);
+      const range = maxVal - minVal || 1;
+
+      function getPoint(d, i) {
+        const x = padding + (i * (width - 2 * padding)) / Math.max(series.length - 1, 1);
+        let normalized = (Number(d[metric] || 0) - minVal) / range;
+
+        if (invert) {
+          normalized = 1 - normalized;
+        }
+
+        const y = height - padding - normalized * (height - 2 * padding);
+        return { x, y };
+      }
+
+      const points = series.map((d, i) => {
+        const point = getPoint(d, i);
+        return `${point.x},${point.y}`;
+      }).join(' ');
+
+      const circles = series.map((d, i) => {
+        const point = getPoint(d, i);
+        const value = Number(d[metric] || 0);
+        const displayValue = metric === 'position' ? value.toFixed(1) : value.toLocaleString();
+        return `<circle cx="${point.x}" cy="${point.y}" r="3" fill="#2563eb">
+          <title>${d.date}: ${displayValue} ${metric}</title>
+        </circle>`;
+      }).join('');
+
+      const gridLines = [0, 0.25, 0.5, 0.75, 1].map(r => {
+        const y = height - padding - r * (height - 2 * padding);
+        let labelValue;
+
+        if (invert) {
+          labelValue = minVal + (1 - r) * range;
+        } else {
+          labelValue = minVal + r * range;
+        }
+
+        const label = metric === 'position' ? labelValue.toFixed(1) : Math.round(labelValue).toLocaleString();
+
+        return `
+          <line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="#e5e7eb" stroke-width="1" />
+          <text x="${padding - 8}" y="${y + 4}" text-anchor="end" fill="#666" font-size="11">${label}</text>
+        `;
+      }).join('');
+
+      return `
+        <svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+          ${gridLines}
+          <polyline
+            fill="none"
+            stroke="#2563eb"
+            stroke-width="3"
+            points="${points}"
+          />
+          ${circles}
+        </svg>
+      `;
+    }
+
+    function updateIndicators() {
+      const columns = ['page', 'clicks', 'impressions', 'ctr', 'position'];
+      columns.forEach(col => {
+        const el = document.getElementById(`${col}-indicator`);
+        if (!el) return;
+        el.textContent = currentSort.column === col
+          ? (currentSort.direction === 'asc' ? '▲' : '▼')
+          : '';
+      });
+    }
+
+    function updateResultsCount() {
+      const count = aggregatedData.length;
+      document.getElementById('results-count').textContent =
+        `Showing ${count.toLocaleString()} page${count === 1 ? '' : 's'}`;
+    }
+
+    async function loadZeroPages() {
+      try {
+        const pages = await fetch('./zero_pages.json').then(r => r.json());
+        const container = document.getElementById('zero-pages-container');
+        const countEl = document.getElementById('zero-pages-count');
+
+        countEl.textContent = `${pages.length.toLocaleString()} page${pages.length === 1 ? '' : 's'} with zero impressions so far`;
+
+        if (!pages.length) {
+          container.innerHTML = 'All pages currently have impressions.';
+          return;
+        }
+
+        let html = '<ul class="zero-list">';
+        pages.forEach(page => {
+          html += `<li><a href="${page}" target="_blank">${page}</a></li>`;
+        });
+        html += '</ul>';
+
+        container.innerHTML = html;
+      } catch (e) {
+        document.getElementById('zero-pages-count').textContent = 'No zero-impression data available yet';
+        document.getElementById('zero-pages-container').innerHTML = 'No data available yet.';
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
