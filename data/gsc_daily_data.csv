@@ -26,6 +26,8 @@ date,page,clicks,impressions,ctr,position
 2026-05-01,https://workingwithhouses.com/,1,2,0.5,1.0
 2026-05-01,https://workingwithhouses.com/house-too-messy-to-sell/,1,1,1.0,14.0
 2026-05-02,https://workingwithhouses.com/destin-cant-sell-house/,1,1,1.0,2.0
+2026-05-07,https://workingwithhouses.com/,1,2,0.5,4.5
+2026-05-07,https://workingwithhouses.com/panama-city-cant-sell-house/,1,1,1.0,6.0
 2026-03-08,https://workingwithhouses.com/,0,1,0.0,1.0
 2026-03-08,https://workingwithhouses.com/about/blog/,0,1,0.0,1.0
 2026-03-08,https://workingwithhouses.com/about/our-company/,0,1,0.0,1.0
@@ -1065,3 +1067,12 @@ date,page,clicks,impressions,ctr,position
 2026-05-06,https://workingwithhouses.com/selling-house-for-job-relocation/,0,4,0.0,7.0
 2026-05-06,https://workingwithhouses.com/tired-landlord/,0,5,0.0,9.0
 2026-05-06,https://workingwithhouses.com/vacant-house/,0,9,0.0,10.11111111111111
+2026-05-07,https://workingwithhouses.com/atlanta-cant-sell-house/,0,2,0.0,8.0
+2026-05-07,https://workingwithhouses.com/charlotte-cant-sell-house/,0,1,0.0,8.0
+2026-05-07,https://workingwithhouses.com/house-didnt-sell/,0,16,0.0,69.6875
+2026-05-07,https://workingwithhouses.com/house-needs-repairs/,0,2,0.0,15.5
+2026-05-07,https://workingwithhouses.com/sell-the-house-fast/,0,2,0.0,30.0
+2026-05-07,https://workingwithhouses.com/selling-house-for-job-relocation/,0,2,0.0,8.0
+2026-05-07,https://workingwithhouses.com/st-louis-cant-sell-house/,0,1,0.0,4.0
+2026-05-07,https://workingwithhouses.com/tired-landlord/,0,6,0.0,20.333333333333332
+2026-05-07,https://workingwithhouses.com/vacant-house/,0,2,0.0,9.5

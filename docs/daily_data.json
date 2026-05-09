@@ -216,6 +216,22 @@
     "position":2.0
   },
   {
+    "date":"2026-05-07",
+    "page":"https:\/\/workingwithhouses.com\/",
+    "clicks":1,
+    "impressions":2,
+    "ctr":0.5,
+    "position":4.5
+  },
+  {
+    "date":"2026-05-07",
+    "page":"https:\/\/workingwithhouses.com\/panama-city-cant-sell-house\/",
+    "clicks":1,
+    "impressions":1,
+    "ctr":1.0,
+    "position":6.0
+  },
+  {
     "date":"2026-03-08",
     "page":"https:\/\/workingwithhouses.com\/",
     "clicks":0,
@@ -8526,5 +8542,77 @@
     "impressions":9,
     "ctr":0.0,
     "position":10.1111111111
+  },
+  {
+    "date":"2026-05-07",
+    "page":"https:\/\/workingwithhouses.com\/atlanta-cant-sell-house\/",
+    "clicks":0,
+    "impressions":2,
+    "ctr":0.0,
+    "position":8.0
+  },
+  {
+    "date":"2026-05-07",
+    "page":"https:\/\/workingwithhouses.com\/charlotte-cant-sell-house\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":8.0
+  },
+  {
+    "date":"2026-05-07",
+    "page":"https:\/\/workingwithhouses.com\/house-didnt-sell\/",
+    "clicks":0,
+    "impressions":16,
+    "ctr":0.0,
+    "position":69.6875
+  },
+  {
+    "date":"2026-05-07",
+    "page":"https:\/\/workingwithhouses.com\/house-needs-repairs\/",
+    "clicks":0,
+    "impressions":2,
+    "ctr":0.0,
+    "position":15.5
+  },
+  {
+    "date":"2026-05-07",
+    "page":"https:\/\/workingwithhouses.com\/sell-the-house-fast\/",
+    "clicks":0,
+    "impressions":2,
+    "ctr":0.0,
+    "position":30.0
+  },
+  {
+    "date":"2026-05-07",
+    "page":"https:\/\/workingwithhouses.com\/selling-house-for-job-relocation\/",
+    "clicks":0,
+    "impressions":2,
+    "ctr":0.0,
+    "position":8.0
+  },
+  {
+    "date":"2026-05-07",
+    "page":"https:\/\/workingwithhouses.com\/st-louis-cant-sell-house\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":4.0
+  },
+  {
+    "date":"2026-05-07",
+    "page":"https:\/\/workingwithhouses.com\/tired-landlord\/",
+    "clicks":0,
+    "impressions":6,
+    "ctr":0.0,
+    "position":20.3333333333
+  },
+  {
+    "date":"2026-05-07",
+    "page":"https:\/\/workingwithhouses.com\/vacant-house\/",
+    "clicks":0,
+    "impressions":2,
+    "ctr":0.0,
+    "position":9.5
   }
 ]
