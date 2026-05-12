@@ -24,6 +24,14 @@
     "position":5.3333333333
   },
   {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/",
+    "clicks":2,
+    "impressions":6,
+    "ctr":0.3333333333,
+    "position":16.0
+  },
+  {
     "date":"2026-03-10",
     "page":"https:\/\/workingwithhouses.com\/",
     "clicks":1,
@@ -230,6 +238,14 @@
     "impressions":1,
     "ctr":1.0,
     "position":6.0
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/hilton-head-cant-sell-house\/",
+    "clicks":1,
+    "impressions":1,
+    "ctr":1.0,
+    "position":5.0
   },
   {
     "date":"2026-03-08",
@@ -8862,5 +8878,133 @@
     "impressions":3,
     "ctr":0.0,
     "position":14.0
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/atlanta-cant-sell-house\/",
+    "clicks":0,
+    "impressions":2,
+    "ctr":0.0,
+    "position":9.5
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/cant-sell-house\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":2.0
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/dahlonega-cant-sell-house\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":8.0
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/destin-cant-sell-house\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":38.0
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/house-didnt-sell\/",
+    "clicks":0,
+    "impressions":4,
+    "ctr":0.0,
+    "position":77.5
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/house-needs-repairs\/",
+    "clicks":0,
+    "impressions":4,
+    "ctr":0.0,
+    "position":29.5
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/how-it-works\/",
+    "clicks":0,
+    "impressions":4,
+    "ctr":0.0,
+    "position":2.0
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/montgomery-cant-sell-house\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":11.0
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/property-finders-bird-dogs\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":27.0
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/property-finders\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":6.0
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/reviews\/",
+    "clicks":0,
+    "impressions":3,
+    "ctr":0.0,
+    "position":18.6666666667
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/sell-the-house-fast\/",
+    "clicks":0,
+    "impressions":2,
+    "ctr":0.0,
+    "position":2.0
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/tired-landlord\/",
+    "clicks":0,
+    "impressions":13,
+    "ctr":0.0,
+    "position":17.3076923077
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/vacant-house\/",
+    "clicks":0,
+    "impressions":6,
+    "ctr":0.0,
+    "position":12.1666666667
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/valdosta-cant-sell-house\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":20.0
+  },
+  {
+    "date":"2026-05-10",
+    "page":"https:\/\/workingwithhouses.com\/warner-robins-cant-sell-house\/",
+    "clicks":0,
+    "impressions":1,
+    "ctr":0.0,
+    "position":1.0
   }
 ]
