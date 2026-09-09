@@ -56,22 +56,6 @@
     "position":6.2692307692
   },
   {
-    "date":"2026-03-13",
-    "page":"https:\/\/workingwithhouses.com\/",
-    "clicks":1,
-    "impressions":3,
-    "ctr":0.3333333333,
-    "position":2.0
-  },
-  {
-    "date":"2026-03-13",
-    "page":"https:\/\/workingwithhouses.com\/property-finders\/",
-    "clicks":1,
-    "impressions":1,
-    "ctr":1.0,
-    "position":13.0
-  },
-  {
     "date":"2026-03-17",
     "page":"https:\/\/workingwithhouses.com\/",
     "clicks":1,
@@ -926,70 +910,6 @@
     "impressions":1,
     "ctr":1.0,
     "position":4.0
-  },
-  {
-    "date":"2026-03-13",
-    "page":"https:\/\/workingwithhouses.com\/about\/contact-us\/",
-    "clicks":0,
-    "impressions":1,
-    "ctr":0.0,
-    "position":4.0
-  },
-  {
-    "date":"2026-03-13",
-    "page":"https:\/\/workingwithhouses.com\/about\/our-company\/",
-    "clicks":0,
-    "impressions":1,
-    "ctr":0.0,
-    "position":3.0
-  },
-  {
-    "date":"2026-03-13",
-    "page":"https:\/\/workingwithhouses.com\/about\/who-we-are\/",
-    "clicks":0,
-    "impressions":3,
-    "ctr":0.0,
-    "position":4.0
-  },
-  {
-    "date":"2026-03-13",
-    "page":"https:\/\/workingwithhouses.com\/atlanta-cant-sell-house\/",
-    "clicks":0,
-    "impressions":1,
-    "ctr":0.0,
-    "position":11.0
-  },
-  {
-    "date":"2026-03-13",
-    "page":"https:\/\/workingwithhouses.com\/kissimmee-cant-sell-house\/",
-    "clicks":0,
-    "impressions":1,
-    "ctr":0.0,
-    "position":6.0
-  },
-  {
-    "date":"2026-03-13",
-    "page":"https:\/\/workingwithhouses.com\/orlando-cant-sell-house\/",
-    "clicks":0,
-    "impressions":2,
-    "ctr":0.0,
-    "position":2.5
-  },
-  {
-    "date":"2026-03-13",
-    "page":"https:\/\/workingwithhouses.com\/panama-city-cant-sell-house\/",
-    "clicks":0,
-    "impressions":1,
-    "ctr":0.0,
-    "position":1.0
-  },
-  {
-    "date":"2026-03-13",
-    "page":"https:\/\/workingwithhouses.com\/reviews\/",
-    "clicks":0,
-    "impressions":1,
-    "ctr":0.0,
-    "position":3.0
   },
   {
     "date":"2026-03-14",
